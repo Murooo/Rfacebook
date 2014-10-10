@@ -37,60 +37,57 @@
 #' }
 #'
 
-
-	if (n<=100){
-		url <- paste(url, n, sep="")
-	}
-	if (n>100){
-		url <- paste(url, "100", sep="")
-	}
-	# making query
-	content <- callAPI(url=url, token=token)
-	l <- length(content$data); cat(l, "posts ")
-	
-	## retrying 3 times if error was found
-	error <- 0
-	while (length(content$error_code)>0){
-		cat("Error!\n")
-		Sys.sleep(0.5)
-		error <- error + 1
-		content <- callAPI(url=url, token=token)		
-		if (error==3){ stop(content$error_msg) }
-	}
-	if (length(content$data)==0){ 
-		stop("No public posts mentioning the string were found")
-	}
 	df <- pageDataToDF(content$data)
-
-	## paging if n>100
-	if (n>100){
-		df.list <- list(df)
-		while (l<n & length(content$data)>0 & 
-			!is.null(content$paging$`next`)){
-			# waiting one second before making next API call...
-			Sys.sleep(0.5)
-			url <- content$paging$`next`
-			content <- callAPI(url=url, token=token)
-			l <- l + length(content$data)
-			if (length(content$data)>0){ cat(l, "posts ") }
-
-			## retrying 3 times if error was found
-			error <- 0
-			while (length(content$error_code)>0){
-				cat("Error!\n")
-				Sys.sleep(0.5)
-				error <- error + 1
-				content <- callAPI(url=url, token=token)		
-				if (error==3){ stop(content$error_msg) }
-			}
-
 			df.list <- c(df.list, list(pageDataToDF(content$data)))
-		}
-		df <- do.call(rbind, df.list)
-	}
-	return(df)
 getInsights <- function(object_id, token, metric, period='day', n=5){
   url <- paste0('https://graph.facebook.com/', object_id,
                 '/insights/', metric, '?period=', period)
   
+  # making query
+  content <- callAPI(url=url, token=token)
+  l <- length(content$data[[1]]$values)
+  if (l==0){ 
+    stop("No public posts mentioning the string were found")
+  }
+  
+  ## retrying 3 times if error was found
+  error <- 0
+  while (length(content$error_code)>0){
+    cat("Error!\n")
+    Sys.sleep(0.5)
+    error <- error + 1
+    print(url)
+    content <- callAPI(url=url, token=token)		
+    if (error==3){ stop(content$error_msg) }
+  }
+  if (length(content$data)==0){ 
+    stop("No public posts mentioning the string were found")
+  }
+  
+  if (n>nrow(df)){
+    df.list <- list(df)
+    while (l<n & l>0 & 
+             !is.null(content$paging$`next`)&
+             period != 'lifetime'){
+      # waiting one second before making next API call...
+      Sys.sleep(0.5)
+      url <- content$paging$`next`
+      content <- callAPI(url=url, token=token)
+      l <- l + nrow(df)
+      
+      ## retrying 3 times if error was found
+      error <- 0
+      while (length(content$error_code)>0){
+        cat("Error!\n")
+        Sys.sleep(0.5)
+        error <- error + 1
+        content <- callAPI(url=url, token=token)		
+        if (error==3){ stop(content$error_msg) }
+      }
+      
+    }
+    df <- do.call(rbind, df.list)
+  }
+  cat(l, "objects found ")
+  return(df)
 }
