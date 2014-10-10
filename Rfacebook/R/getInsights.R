@@ -37,16 +37,7 @@
 #' }
 #'
 
-getPage <- function(page, token, n=100, feed=FALSE){
 
-	url <- paste0('https://graph.facebook.com/', page,
-		'/posts?fields=from,message,created_time,type,link,comments.summary(true)',
-		',likes.summary(true),shares&limit=')
-	if (feed){
-		url <- paste0('https://graph.facebook.com/', page,
-		'/feed?fields=from,message,created_time,type,link,comments.summary(true)',
-		',likes.summary(true),shares&limit=')
-	}
 	if (n<=100){
 		url <- paste(url, n, sep="")
 	}
@@ -98,4 +89,8 @@ getPage <- function(page, token, n=100, feed=FALSE){
 		df <- do.call(rbind, df.list)
 	}
 	return(df)
+getInsights <- function(object_id, token, metric, period='day', n=5){
+  url <- paste0('https://graph.facebook.com/', object_id,
+                '/insights/', metric, '?period=', period)
+  
 }
