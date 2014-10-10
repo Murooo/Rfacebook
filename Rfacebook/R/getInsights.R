@@ -37,8 +37,6 @@
 #' }
 #'
 
-	df <- pageDataToDF(content$data)
-			df.list <- c(df.list, list(pageDataToDF(content$data)))
 getInsights <- function(object_id, token, metric, period='day', n=5){
   url <- paste0('https://graph.facebook.com/', object_id,
                 '/insights/', metric, '?period=', period)
@@ -63,6 +61,7 @@ getInsights <- function(object_id, token, metric, period='day', n=5){
   if (length(content$data)==0){ 
     stop("No public posts mentioning the string were found")
   }
+  df <- insightsDataToDF(content$data, content$data[[1]]$values)
   
   if (n>nrow(df)){
     df.list <- list(df)
@@ -85,6 +84,7 @@ getInsights <- function(object_id, token, metric, period='day', n=5){
         if (error==3){ stop(content$error_msg) }
       }
       
+      df.list <- c(df.list, list(insightsDataToDF(content$data, content$data[[1]]$values)))
     }
     df <- do.call(rbind, df.list)
   }
