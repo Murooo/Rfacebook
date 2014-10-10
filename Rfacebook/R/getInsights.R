@@ -1,39 +1,43 @@
-#' @rdname getPage
+#' @rdname getInsights
 #' @export
 #'
 #' @title 
-#' Extract list of posts from a public Facebook page
+#' Extract Insights metric from a Facebook page (admin role required)
 #'
 #' @description
-#' \code{getPage} retrieves information from a public Facebook page. Note that
-#' information about users that have turned on the "follow" option on their 
-#' profile can also be retrieved with this function.
+#' \code{getInsights} retrieves information from an owned Facebook page. Note 
+#' that you must specify wich metric from insights you need. 
 #'
 #' @author
-#' Pablo Barbera \email{pablo.barbera@@nyu.edu}
-#' @seealso \code{\link{getUsers}}, \code{\link{getPost}}, \code{\link{fbOAuth}}
+#' Danilo Silva \email{silvadaniloc@gmail.com}
+#' Eduardo Carvalho \email {eduardooc.86@gmail.com}
 #'
-#' @param page A page ID or page name.
+#' @param objetct_id An object (page, post, domain) ID.
 #'
 #' @param token Either a temporary access token created at
 #' \url{https://developers.facebook.com/tools/explorer} or the OAuth token 
 #' created with \code{fbOAuth}.
 #'
-#' @param n Number of posts of page to return. Note that number can be sometimes
-#' higher or lower, depending on status of API.
+#' @param period Time intervals to return
+#' 
+#' @param metric The metric wich you want to get values (All metrics are listed
+#' in https://developers.facebook.com/docs/graph-api/reference/v2.1/insights)
+#' 
+#' @param n Number of time intervals of metric values to return. Note that all
+#' metrics returned will be multiple of 3, except for lifetime period. Default
+#' n is 5
 #'
-#' @param feed If \code{TRUE}, the function will also return posts on the page
-#' that were made by others (not only the admin of the page).
 #'
 #'
 #' @examples \dontrun{
 #' ## See examples for fbOAuth to know how token was created.
-#' ## Getting information about Facebook's Facebook Page
-#'	load("fb_oauth")
-#'	fb_page <- getPage(page="facebook", token=fb_oauth)
-#' ## Getting posts on Humans of New York page, including posts by others users
-#' ## (not only owner of page)
-#'  page <- getPage(page="humansofnewyork", token=fb_oauth, feed=TRUE)
+#' ## Getting page impressions for Facebook's Facebook Page
+#' ## (only owner or admin of page)
+#'  load("fb_oauth")
+#'	insights <- getInsights(object_id="20531316728", token=fb_oauth, metric='page_impressions')
+#' ## Getting post impressions for a random Facebook`s page post
+#' ## (only owner or admin of page)
+#'  insights <- getInsights(object_id='221568044327801_754789777921289', token=fb_oauth, metric='post_impressions', period='days_28')
 #' }
 #'
 
